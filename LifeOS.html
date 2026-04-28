@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeOS - Bhavya</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+@keyframes pop{0%{transform:scale(.8);opacity:0}50%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+@keyframes slide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate-pop{animation:pop.35s ease-out}
+.animate-float{animation:float 3s ease-in-out infinite}
+.animate-glow{animation:glow 2s infinite}
+.animate-slide{animation:slide.4s ease-out}
+body{background:#050507;color:#fff;margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont;overscroll-behavior:none}
+.glass{background:rgba(18,18,26,.88);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
+.bhavya-bg{background:radial-gradient(ellipse at top,rgba(0,255,170,.18),transparent 60%)}
+.btn{transition:all.15s ease}
+.btn:active{transform:scale(.96)}
+*{-webkit-tap-highlight-color:transparent}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+function App(){
+  const [player,setPlayer]=useState(()=>{const s=localStorage.getItem('lifeos_final');return s?JSON.parse(s).p:{xp:0,l:1,h:0,m:0,s:0,g:0,d:1,hx:0,mx:0,sx:0,gx:0,str:0,tt:0,satan:0,bhavya:1,asc:0}});
+  const [tasks,setTasks]=useState(()=>{const s=localStorage.getItem('lifeos_final');return s?JSON.parse(s).t:[
+    {i:1,n:"Physical Training",x:60,st:"s",c:0,su:[{t:"Cardio",d:0},{t:"Muscle",d:0}]},
+    {i:2,n:"Hygiene",x:40,st:"h",c:0,su:[{t:"Brush day",d:0},{t:"Brush night",d:0},{t:"Sleep 8h",d:0},{t:"Bath",d:0}]},
+    {i:3,n:"Core Work",x:80,st:"m",c:0,su:[{t:"Studying",d:0}]}
+  ]});
+  const [gods,setGods]=useState(()=>{const s=localStorage.getItem('lifeos_final');return s?JSON.parse(s).g:[
+    {i:1,n:"Hygeia",e:"🌿",x:0,nd:2500000,c:"#10B981",ti:"Lifelong Health",a:0},
+    {i:2,n:"Ryan Howard",e:"💼",x:0,nd:1500000,c:"#64748B",ti:"The Temp",a:0},
+    {i:3,n:"Sisyphus",e:"⛰️",x:0,nd:900000,c:"#6366F1",ti:"JEE AIR 1",a:0},
+    {i:4,n:"Jordan Belfort",e:"🐺",x:0,nd:750000,c:"#F59E0B",ti:"Sell the Book",a:0},
+    {i:5,n:"Albert Camus",e:"📖",x:0,nd:2500000,c:"#8B5CF6",ti:"Lifelong Creator",a:0},
+    {i:6,n:"Spidey",e:"🕷️",x:0,nd:2500000,c:"#EF4444",ti:"Lifelong Physique",a:0},
+    {i:7,n:"Lewandowski",e:"🤖",x:0,nd:600000,c:"#DC2626",ti:"The Robot",a:0}
+  ]});
+  const [sins,setSins]=useState(()=>{const s=localStorage.getItem('lifeos_final');return s?JSON.parse(s).si:[
+    {i:1,t:"Fapped",d:0,w:15},
+    {i:2,t:"Skipped grind",d:0,w:15},
+    {i:3,t:"did something bad",d:0,w:50}
+  ]});
+
+  const [tab,setTab]=useState('tasks');
+  const [msg,setMsg]=useState('');
+  const [pop,setPop]=useState(null);
+  const [showAdd,setShowAdd]=useState(false);
+  const [nt,setNt]=useState({n:'',x:50,st:'m'});
+
+  useEffect(()=>{localStorage.setItem('lifeos_final',JSON.stringify({p:player,t:tasks,g:gods,si:sins}))},[player,tasks,gods,sins]);
+
+  const toast=(t,x,y)=>{setMsg(t);if(x)setPop({t,x,y});setTimeout(()=>{setMsg('');setPop(null)},1300)};
+
+  const claim=(id,e)=>{const r=e.currentTarget.getBoundingClientRect();setTasks(ts=>ts.map(t=>{if(t.i!==id)return t;const d=t.su.filter(s=>s.d).length;if(!d)return t;const earn=Math.floor(t.x*d/t.su.length);toast(`+${earn}`,r.left+20,r.top);setPlayer(p=>{const inc=p.bhavya<10?0.2:0.02;return{...p,xp:p.xp+earn,l:Math.floor((p.xp+earn)/100)+1,[t.st]:p[t.st]+1,[t.st+'x']:p[t.st+'x']+earn,tt:p.tt+1,bhavya:p.bhavya+inc}});return{...t,c:t.c+1,su:t.su.map(s=>({...s,d:0}))}}))};
+  const toggle=(tid,i)=>setTasks(ts=>ts.map(t=>t.i===tid?{...t,su:t.su.map((s,idx)=>idx===i?{...s,d:!s.d}:s)}:t));
+  const give=(gid,st)=>{if(player[st+'x']<25)return;setPlayer(p=>({...p,[st+'x']:p[st+'x']-25}));setGods(gs=>gs.map(g=>{if(g.i!==gid)return g;const nx=g.x+25;if(nx>=g.nd){toast(`ASCENDED! +1 BHAVYA`);setPlayer(p=>({...p,bhavya:Math.floor(p.bhavya)+1,asc:p.asc+1}));return{...g,x:0,nd:Math.floor(g.nd*1.5),a:g.a+1}}return{...g,x:nx}}))};
+  const sinToggle=id=>{setSins(ss=>{const ns=ss.map(s=>s.i===id?{...s,d:!s.d}:s);setPlayer(p=>({...p,satan:Math.min(100,ns.filter(x=>x.d).reduce((a,b)=>a+b.w,0))}));return ns})};
+  const sleep=()=>{const s=player.satan;if(s===0){setPlayer(p=>({...p,xp:p.xp+10}));toast('+10 Pure Day')}else if(s>=50){setPlayer(p=>({...p,xp:Math.max(0,p.xp-30),str:0}));toast('-30 Corrupted')}setPlayer(p=>({...p,d:p.d+1,str:s<30?p.str+1:0}));setTasks(ts=>ts.map(t=>({...t,su:t.su.map(x=>({...x,d:0}))})));setSins(ss=>ss.map(x=>({...x,d:0})))};
+  const addTask=()=>{if(!nt.n.trim())return;setTasks(t=>[...t,{i:Date.now(),n:nt.n,x:+nt.x,st:nt.st,c:0,su:[{t:"Do it",d:0}]}]);setNt({n:'',x:50,st:'m'});setShowAdd(false);toast('Task added')};
+  const addSub=tid=>{const v=prompt('Subtask name:');if(!v)return;setTasks(ts=>ts.map(t=>t.i===tid?{...t,su:[...t.su,{t:v,d:0}]}:t))};
+
+  return(
+    <div className="min-h-screen max-w-[420px] mx-auto relative select-none">
+      <div className="absolute inset-0 bhavya-bg pointer-events-none"/>
+      {msg&&<div className="fixed top-5 left-1/2 -translate-x-1/2 bg-[#00FFAA] text-black px-5 py-2 rounded-full font-black text-sm z-50 animate-pop shadow-lg shadow-[#00FFAA]/30">{msg}</div>}
+      {pop&&<div className="fixed pointer-events-none text-[#00FFAA] font-black text-2xl z-50 animate-pop" style={{left:pop.x,top:pop.y-30}}>{pop.t}</div>}
+
+      <div className="relative z-10 p-4 pb-24">
+        <div className="text-center pt-3 pb-5 animate-slide">
+          <div className="text-5xl animate-float mb-1">👑</div>
+          <h1 className="text-[42px] font-black leading-none tracking-tighter bg-gradient-to-r from-[#00FFAA] via-cyan-300 to-[#00FFAA] bg-clip-text text-transparent animate-glow">BHAVYA</h1>
+          <p className="text-[11px] uppercase tracking-[0.2em] opacity-50 mt-1">Level {Math.floor(player.bhavya)} • {player.asc} Wins</p>
+          <div className="flex justify-center gap-8 mt-4">
+            <div><p className="text-[10px] opacity-40">DAY</p><p className="text-xl font-bold">{player.d}</p></div>
+            <div><p className="text-[10px] opacity-40">STREAK</p><p className="text-xl font-bold">🔥{player.str}</p></div>
+            <div><p className="text-[10px] opacity-40">SATAN</p><p className="text-xl font-bold text-red-500">{player.satan}%</p></div>
+          </div>
+        </div>
+
+        <div className="glass rounded-2xl p-1 flex gap-1 mb-4 sticky top-3 z-40">
+          {['tasks','gods','satan','stats'].map(t=>(
+            <button key={t} onClick={()=>setTab(t)} className={`flex-1 py-2.5 rounded-xl text-[12px] font-bold capitalize btn ${tab===t?'bg-white text-black shadow-md':'text-white/60 hover:text-white'}`}>{t}</button>
+          ))}
+        </div>
+
+        {tab==='tasks'&&<div className="space-y-3">
+          {tasks.map((t,idx)=>{const d=t.su.filter(s=>s.d).length;const pct=Math.round(d/t.su.length*100);return(
+            <div key={t.i} className="glass rounded-[28px] p-4 animate-slide hover:border-white/15 transition-all" style={{animationDelay:idx*40+'ms'}}>
+              <div className="flex justify-between items-start">
+                <div><h3 className="font-bold text-[15px] flex items-center gap-2">{t.n}{t.c>0&&<span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 font-medium">{t.c}</span>}</h3><p className="text-[11px] opacity-50 mt-0.5">+{t.x} XP • {d}/{t.su.length}</p></div>
+                <button onClick={e=>claim(t.i,e)} disabled={!d} className={`btn px-4 py-2 rounded-2xl text-[13px] font-bold ${d?'bg-[#00FFAA] text-black shadow-lg shadow-[#00FFAA]/20 active:shadow-[#00FFAA]/10':'bg-zinc-800 text-zinc-600'}`}>Claim {pct>0&&pct<100?`${pct}%`:''}</button>
+              </div>
+              <div className="mt-3.5 space-y-2.5">{t.su.map((s,i)=>(<button key={i} onClick={()=>toggle(t.i,i)} className="group flex items-center gap-3 w-full text-left"><div className={`w-[22px] h-[22px] rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${s.d?'bg-[#00FFAA] border-[#00FFAA] scale-105 shadow-md shadow-[#00FFAA]/20':'border-white/20 group-hover:border-white/40 group-active:scale-95'}`}>{s.d&&<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6l2 2 4-4" stroke="#000" strokeWidth="2" strokeLinecap="round"/></svg>}</div><span className={`text-[14px] leading-snug transition-all ${s.d?'line-through opacity-40':'opacity-85 group-hover:opacity-100'}`}>{s.t}</span></button>))}</div>
+              <button onClick={()=>addSub(t.i)} className="mt-3 text-[11px] opacity-35 hover:opacity-70 transition-opacity">+ add subtask</button>
+            </div>
+          )})}
+          {showAdd?(
+            <div className="glass rounded-[28px] p-4 space-y-3 animate-slide border-[#00FFAA]/20">
+              <input autoFocus value={nt.n} onChange={e=>setNt({...nt,n:e.target.value})} placeholder="New task name..." className="w-full bg-black/60 border border-white/10 focus:border-[#00FFAA]/50 rounded-xl px-3.5 py-2.5 text-[14px] outline-none transition-colors"/>
+              <div className="flex gap-2">
+                <input type="number" value={nt.x} onChange={e=>setNt({...nt,x:e.target.value})} className="w-24 bg-black/60 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none"/>
+                <select value={nt.st} onChange={e=>setNt({...nt,st:e.target.value})} className="flex-1 bg-black/60 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none">
+                  <option value="h">❤️ Health</option><option value="m">🧠 Mana</option><option value="s">⚡ Stamina</option><option value="g">💰 Gold</option>
+                </select>
+              </div>
+              <div className="flex gap-2"><button onClick={addTask} className="flex-1 btn bg-[#00FFAA] text-black font-bold py-2.5 rounded-xl shadow-lg shadow-[#00FFAA]/20">Add Task</button><button onClick={()=>setShowAdd(false)} className="px-4 btn bg-white/10 hover:bg-white/15 rounded-xl">Cancel</button></div>
+            </div>
+          ):(
+            <button onClick={()=>setShowAdd(true)} className="w-full glass rounded-[28px] py-3.5 font-semibold text-[14px] opacity-75 hover:opacity-100 hover:border-white/20 btn">+ Add New Task</button>
+          )}
+          <button onClick={sleep} className="w-full mt-2 bg-gradient-to-b from-violet-900 via-purple-900 to-violet-950 border border-violet-800/50 rounded-[28px] py-4 font-bold text-[15px] shadow-xl shadow-purple-950/40 hover:shadow-purple-900/50 btn">🌙 Sleep — End Day {player.d}</button>
+        </div>}
+
+        {tab==='gods'&&<div className="space-y-3">
+          {gods.map((g,i)=>{const pct=Math.min(99.9,g.x/g.nd*100);return(
+            <div key={g.i} className="glass rounded-[28px] p-4 animate-slide hover:border-white/15 transition-all" style={{animationDelay:i*30+'ms'}}>
+              <div className="flex gap-3.5">
+                <div className="text-[32px] leading-none animate-float" style={{animationDelay:i*200+'ms'}}>{g.e}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2"><h3 className="font-bold truncate">{g.n}</h3><span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 shrink-0 font-medium">{g.a}×</span></div>
+                  <p className="text-[11px] opacity-50 -mt-0.5">{g.ti}</p>
+                  <div className="mt-3.5">
+                    <div className="flex justify-between text-[10px] mb-1.5 font-medium"><span className="opacity-60">{Math.floor(g.x/1000)}k / {Math.floor(g.nd/1000)}k</span><span className="opacity-40">{pct.toFixed(1)}%</span></div>
+                    <div className="h-[7px] bg-black/80 rounded-full overflow-hidden p-[1px]"><div className="h-full rounded-full transition-all duration-700 ease-out" style={{width:pct+'%',background:`linear-gradient(90deg,${g.c},${g.c}dd)`,boxShadow:`0 0 12px ${g.c}60, inset 0 1px 2px rgba(255,255,255,.2)`}}/></div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5 mt-3.5">{['h','m','s','g'].map(st=><button key={st} disabled={player[st+'x']<25} onClick={()=>give(g.i,st)} className="btn bg-black/60 hover:bg-black/80 disabled:opacity-25 disabled:hover:bg-black/60 border border-white/5 rounded-xl py-1.5 text-[11px] font-medium transition-all">{st==='h'?'❤️':st==='m'?'🧠':st==='s'?'⚡':'💰'} <span className="opacity-60">{player[st+'x']}</span></button>)}</div>
+                </div>
+              </div>
+            </div>
+          )})}
+        </div>}
+
+        {tab==='satan'&&<div className="space-y-4 animate-slide">
+          <div className="glass rounded-[28px] p-6 text-center relative overflow-hidden" style={{background:'radial-gradient(ellipse at 50% 0%,rgba(239,68,68,.28),transparent 65%),rgba(18,18,26,.92)'}}>
+            <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:`repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.5) 10px,rgba(255,255,255,.5) 11px)`}}/>
+            <div className="relative"><div className="text-5xl mb-2 animate-float" style={{filter:'drop-shadow(0 0 20px rgba(239,68,68,.5))'}}>😈</div><h2 className="text-xl font-black tracking-wider text-red-500">SATAN</h2><div className="mt-4 w-full h-3 bg-black/90 rounded-full overflow-hidden p-0.5 border border-red-950/50"><div className="h-full bg-gradient-to-r from-red-800 via-red-600 to-red-500 rounded-full transition-all duration-700 ease-out relative overflow-hidden" style={{width:player.satan+'%'}}><div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[slide_2s_linear_infinite]" style={{backgroundSize:'200% 100%'}}/></div></div><p className="text-[11px] opacity-60 mt-2.5 font-medium">{player.satan}% corruption • {sins.filter(s=>s.d).length}/3 sins active</p></div>
+          </div>
+          <div className="space-y-2.5">{sins.map(s=>(
+            <button key={s.i} onClick={()=>sinToggle(s.i)} className={`w-full glass rounded-2xl p-3.5 flex items-center gap-3 btn text-left transition-all ${s.d?'ring-1 ring-red-900/60 bg-red-950/25 border-red-900/30':'hover:border-white/15'}`}>
+              <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${s.d?'bg-red-600 border-red-500 scale-105 shadow-md shadow-red-600/30':'border-white/25'}`}>{s.d&&<span className="text-[11px] font-bold">✕</span>}</div>
+              <span className={`flex-1 text-[14px] font-medium transition-colors ${s.d?'text-red-400':'opacity-90'}`}>{s.t}</span>
+              <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold transition-all ${s.d?'bg-red-950/60 text-red-300 ring-1 ring-red-800/50':'bg-black/60 opacity-60'}`}>+{s.w}%</span>
+            </button>
+          ))}<p className="text-[10px] opacity-40 text-center pt-1">0% = +10 XP bonus • 50%+ = -30 XP & streak reset</p></div>
+        </div>}
+
+        {tab==='stats'&&<div className="grid grid-cols-2 gap-3 animate-slide">
+          {[{n:'Health',v:player.h,k:'hx',i:'❤️',c:'#FF3B3B'},{n:'Mana',v:player.m,k:'mx',i:'🧠',c:'#3B82F6'},{n:'Stamina',v:player.s,k:'sx',i:'⚡',c:'#22C55E'},{n:'Gold',v:player.g,k:'gx',i:'💰',c:'#FFD700'}].map(s=>(
+            <div key={s.n} className="glass rounded-[28px] p-5 text-center hover:border-white/15 transition-all group">
+              <div className="text-[32px] mb-2 group-hover:scale-110 transition-transform duration-300" style={{filter:`drop-shadow(0 0 12px ${s.c}40)`}}>{s.i}</div>
+              <p className="text-[26px] font-black tracking-tight" style={{color:s.c,textShadow:`0 0 20px ${s.c}40`}}>{s.v}</p>
+              <p className="text-[11px] opacity-60 uppercase tracking-wider font-medium mt-1">{s.n}</p>
+              <div className="mt-2.5 pt-2.5 border-t border-white/5"><p className="text-[10px] opacity-40">{(player[s.k]/1000).toFixed(1)}k XP banked</p></div>
+            </div>
+          ))}
+          <div className="glass rounded-[28px] p-5 col-span-2 text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-5" style={{background:`radial-gradient(circle at 50% 50%,#00FFAA,transparent 70%)`}}/>
+            <div className="relative"><p className="text-[11px] opacity-50 uppercase tracking-widest font-medium">Total Tasks Completed</p><p className="text-[36px] font-black text-[#00FFAA] mt-1.5 tracking-tight" style={{textShadow:'0 0 30px rgba(0,255,170,.5)'}}>{player.tt}</p><p className="text-[10px] opacity-40 mt-1">Across {player.d} days</p></div>
+          </div>
+        </div>}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
